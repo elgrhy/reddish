@@ -57,7 +57,7 @@ sudo chmod +x /usr/local/bin/reddish
 
 # Dependencies
 echo "📦 Installing substrate dependencies..."
-python3 -m pip install cryptography pyyaml requests --user --quiet
+python3 -m pip install cryptography pyyaml requests pynacl --user --quiet
 
 # 5. Configuration (Interactive Prompt)
 echo -e "\n🌟 \033[1mWELCOME TO REDDISH\033[0m — Bootstrapping Sovereign Mental Protocol"
