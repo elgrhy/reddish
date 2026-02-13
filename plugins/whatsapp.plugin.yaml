@@ -1,0 +1,4 @@
+name: "whatsapp"
+version: "1.0.0"
+capabilities: ["messaging", "notifications"]
+signature: "d1c8c1c1a7c3a6cc0709d284972ec473b888c2addab19377bdbfef99c089d5e6"
