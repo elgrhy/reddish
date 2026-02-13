@@ -25,10 +25,11 @@ fetch_file() {
 
 # 1. Download Core Assets
 echo "⬇ Fetching core subscription..."
-fetch_file "protocol.mpx" "$RC_HOME/protocol.mpx"
+curl -sSL "$RAW/protocol.mpx" -o "$RC_HOME/protocol.mpx"
 if [ ! -f "$RC_HOME/config.yaml" ]; then
     fetch_file "config.yaml" "$RC_HOME/config.yaml"
 fi
+
 
 # 2. Download Runtime
 fetch_file "runtime/reddish.py" "$RC_HOME/reddish.py"

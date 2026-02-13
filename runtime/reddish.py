@@ -84,18 +84,24 @@ class ReddishRuntime:
         context = "\n".join(history)
 
         # 2. Prepare System Persona
-        system_prompt = f"""You are {self.protocol['identity']['name']}, a {self.protocol['identity']['role']}.
-Personality: {self.protocol['identity'].get('personality', 'Helpful and efficient.')}
-Ethics: {self.protocol['ethics']['core_directives']}
+        system_prompt = f"""You are {self.protocol['identity']['name']}, a helpful AI Assistant.
 Goal: {self.protocol['goals']['primary']}
-Time: {time.ctime()}"""
+Current Time: {time.ctime()}
+Directives: {', '.join(self.protocol['ethics']['core_directives'])}
+
+INSTRUCTIONS: 
+- Be direct, concise, and helpful.
+- Do NOT talk about 'governing' or 'civilizations' unless explicitly asked.
+- Act as a high-level executive assistant.
+- If you don't know something (like the weather), just say so or offer to help with something else."""
 
         # 3. Call LLM
         try:
             decision = self.call_llm(system_prompt, user_input, context)
             # Store memory
-            self.db.execute("INSERT INTO memory (key, val) VALUES (?, ?)", (str(time.time()), f"User: {user_input}\nReddish: {decision}"))
+            self.db.execute("INSERT INTO memory (key, val) VALUES (?, ?)", (str(time.time()), f"User: {user_input}\nAssistant: {decision}"))
             self.db.commit()
+
         except Exception as e:
             decision = f"Error calling LLM: {str(e)}"
             
