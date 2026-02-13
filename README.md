@@ -10,15 +10,32 @@ curl -sSL https://raw.githubusercontent.com/elgrhy/reddish/main/install.sh | bas
 
 ## 🛠 Usage
 
-To start the Reddish engine:
+Reddish is designed to be microscopic and invisible once installed.
+
+### 1. Start the Brain
+Initialize the cognitive substrate in the background:
 ```bash
 reddish start
 ```
 
-To check status:
+### 2. Enter Peer-to-Peer Chat
+Communicate directly with the MPX protocol via the neural link:
 ```bash
-reddish status
+reddish chat
 ```
+
+### 3. Quick Terminal Query
+Ask a question without entering the full chat:
+```bash
+reddish query "summarize our ethical core"
+```
+
+### 4. Management Commands
+*   `reddish status`: Check if the substrate is active.
+*   `reddish stop`: Gracefully shutdown the engine.
+*   `reddish logs`: View real-time background processing.
+*   `reddish audit`: View the cryptographically hashed audit trail.
+
 
 ## 🌐 curl API Interface
 
