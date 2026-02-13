@@ -77,7 +77,8 @@ class ReddishRuntime:
 
     def think(self, user_input):
         self.audit("think", user_input)
-        prompt = f"Identity: {self.protocol['identity']}\nEthics: {self.protocol['ethics']}\nGoal: {self.protocol['goals']['primary']}\nInput: {user_input}\nDecision:"
+        current_time = time.ctime()
+        prompt = f"Identity: {self.protocol['identity']}\nEthics: {self.protocol['ethics']}\nGoal: {self.protocol['goals']['primary']}\nTime: {current_time}\nInput: {user_input}\nDecision:"
         
         try:
             decision = self.call_llm(prompt)
