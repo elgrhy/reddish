@@ -1,4 +1,4 @@
 name: "swarm"
 version: "1.0.0"
 capabilities: ["federation", "mcp"]
-signature: "ed25519-placeholder-sig"
+signature: "aacb14ca5bcefd2c0a143f4f833d8315b8f9758a3c183442fcd4a2e78eb61cfa"

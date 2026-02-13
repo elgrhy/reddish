@@ -1,4 +1,4 @@
 name: "evolution"
 version: "1.0.0"
 capabilities: ["self_update", "diff_application"]
-signature: "ed25519-placeholder-sig"
+signature: "97652844f0d1aaec79b8f1e53722aed03153d89ba248fcec011f3284aded2ce7"
