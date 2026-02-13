@@ -1,0 +1,4 @@
+name: "audit"
+version: "1.0.0"
+capabilities: ["merkle_trail", "logging"]
+signature: "ed25519-placeholder-sig"

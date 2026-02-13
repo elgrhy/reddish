@@ -1,0 +1,25 @@
+# =====================================================
+# Reddish Configuration: Production v1.0.0
+# =====================================================
+
+llm:
+  provider: "openai"
+  model: "gpt-4o-mini"
+  api_key: "" # To be provided by user via CLI
+
+runtime:
+  port: 7777
+  host: "0.0.0.0"
+  protocol_path: "~/.reddish/protocol.mpx"
+  memory_db: "~/.reddish/memory.db"
+  logs_dir: "~/.reddish/logs"
+
+security:
+  encryption_enabled: true
+  signature_check: true
+  audit_gate: true
+
+swarm:
+  enabled: true
+  role: "Planner"
+  relay: "https://swarm.reddishclaw.com"

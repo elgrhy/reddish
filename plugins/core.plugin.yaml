@@ -1,0 +1,4 @@
+name: "core"
+version: "1.0.0"
+capabilities: ["llm_mediation", "memory"]
+signature: "ed25519-placeholder-sig"

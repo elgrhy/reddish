@@ -1,0 +1,4 @@
+name: "security"
+version: "1.0.0"
+capabilities: ["encryption", "signature_verification"]
+signature: "ed25519-placeholder-sig"
