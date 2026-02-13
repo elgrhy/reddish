@@ -1,4 +1,4 @@
-import os, sys, json, yaml, sqlite3, hashlib, time, base64
+import os, sys, json, yaml, sqlite3, hashlib, time, base64, requests
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from nacl.signing import VerifyKey
@@ -77,8 +77,30 @@ class ReddishRuntime:
 
     def think(self, user_input):
         self.audit("think", user_input)
-        # Real logic: uses protocol instructions to call LLM
-        return {"status": "success", "decision": f"Reddish Processed: {user_input}", "identity": self.protocol['identity']}
+        prompt = f"Identity: {self.protocol['identity']}\nEthics: {self.protocol['ethics']}\nGoal: {self.protocol['goals']['primary']}\nInput: {user_input}\nDecision:"
+        
+        try:
+            decision = self.call_llm(prompt)
+        except Exception as e:
+            decision = f"Error calling LLM: {str(e)}"
+            
+        return {"status": "success", "decision": decision, "identity": self.protocol['identity']}
+
+    def call_llm(self, prompt):
+        key = self.config['llm']['api_key']
+        if not key: return "⛔ API Key Missing"
+        
+        res = requests.post("https://api.openai.com/v1/chat/completions",
+            headers={"Authorization": f"Bearer {key}"},
+            json={
+                "model": self.config['llm'].get('model', 'gpt-4o-mini'),
+                "messages": [{"role": "user", "content": prompt}]
+            }, timeout=30)
+        
+        if res.status_code != 200:
+            return f"⛔ LLM Error: {res.text}"
+            
+        return res.json()["choices"][0]["message"]["content"]
 
 # --- API Service ---
 class ReddishHandler(BaseHTTPRequestHandler):

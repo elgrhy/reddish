@@ -1,0 +1,15 @@
+plugins:
+  - name: core
+    url: "https://raw.githubusercontent.com/elgrhy/reddish/main/plugins/core.plugin.yaml"
+  - name: telegram
+    url: "https://raw.githubusercontent.com/elgrhy/reddish/main/plugins/libtelegram.so"
+  - name: whatsapp
+    url: "https://raw.githubusercontent.com/elgrhy/reddish/main/plugins/libwhatsapp.so"
+  - name: swarm
+    url: "https://raw.githubusercontent.com/elgrhy/reddish/main/plugins/swarm.plugin.yaml"
+  - name: evolution
+    url: "https://raw.githubusercontent.com/elgrhy/reddish/main/plugins/evolution.plugin.yaml"
+  - name: security
+    url: "https://raw.githubusercontent.com/elgrhy/reddish/main/plugins/security.plugin.yaml"
+  - name: audit
+    url: "https://raw.githubusercontent.com/elgrhy/reddish/main/plugins/audit.plugin.yaml"

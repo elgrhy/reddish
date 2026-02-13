@@ -35,6 +35,9 @@ fetch_file "runtime/reddish.py" "$RC_HOME/reddish.py"
 
 # 3. Download Plugins
 echo "⬇ Synchronizing plugins..."
+if [ ! -f "$RC_HOME/plugins.yaml" ]; then
+    fetch_file "plugins.yaml" "$RC_HOME/plugins.yaml"
+fi
 PLUGINS=("audit.plugin.yaml" "core.plugin.yaml" "evolution.plugin.yaml" "security.plugin.yaml" "swarm.plugin.yaml")
 for plugin in "${PLUGINS[@]}"; do
     if [ -f "plugins/$plugin" ]; then
@@ -53,21 +56,25 @@ else
 fi
 sudo chmod +x /usr/local/bin/reddish
 
-# Dependencies (Simulation - in real world would use pip)
+# Dependencies
 echo "📦 Installing substrate dependencies..."
-# python3 -m pip install pyaml cryptography pynacl requests --user
+python3 -m pip install cryptography pyyaml requests --user
 
 echo "🔑 Configuration Required"
+
 echo -n "Enter your LLM API Key: "
-read -s API_KEY
+read -s API_KEY < /dev/tty
 echo ""
 
 # Inject key into config
 # Handle both GNU and macOS sed
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    sed -i '' "s/api_key: \"\"/api_key: \"$API_KEY\"/" "$RC_HOME/config.yaml"
-else
-    sed -i "s/api_key: \"\"/api_key: \"$API_KEY\"/" "$RC_HOME/config.yaml"
+if [ -n "$API_KEY" ]; then
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' "s/api_key: \"\"/api_key: \"$API_KEY\"/" "$RC_HOME/config.yaml"
+    else
+        sed -i "s/api_key: \"\"/api_key: \"$API_KEY\"/" "$RC_HOME/config.yaml"
+    fi
 fi
 
 echo "✅ Installation Complete! Run 'reddish start' to begin."
+
