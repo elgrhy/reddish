@@ -77,25 +77,46 @@ class ReddishRuntime:
 
     def think(self, user_input):
         self.audit("think", user_input)
-        current_time = time.ctime()
-        prompt = f"Identity: {self.protocol['identity']}\nEthics: {self.protocol['ethics']}\nGoal: {self.protocol['goals']['primary']}\nTime: {current_time}\nInput: {user_input}\nDecision:"
         
+        # 1. Fetch Memory
+        cursor = self.db.execute("SELECT val FROM memory ORDER BY key DESC LIMIT 5")
+        history = [row[0] for row in cursor.fetchall()]
+        context = "\n".join(history)
+
+        # 2. Prepare System Persona
+        system_prompt = f"""You are {self.protocol['identity']['name']}, a {self.protocol['identity']['role']}.
+Personality: {self.protocol['identity'].get('personality', 'Helpful and efficient.')}
+Ethics: {self.protocol['ethics']['core_directives']}
+Goal: {self.protocol['goals']['primary']}
+Time: {time.ctime()}"""
+
+        # 3. Call LLM
         try:
-            decision = self.call_llm(prompt)
+            decision = self.call_llm(system_prompt, user_input, context)
+            # Store memory
+            self.db.execute("INSERT INTO memory (key, val) VALUES (?, ?)", (str(time.time()), f"User: {user_input}\nReddish: {decision}"))
+            self.db.commit()
         except Exception as e:
             decision = f"Error calling LLM: {str(e)}"
             
         return {"status": "success", "decision": decision, "identity": self.protocol['identity']}
 
-    def call_llm(self, prompt):
+    def call_llm(self, system_prompt, user_input, context):
         key = self.config['llm']['api_key']
         if not key: return "⛔ API Key Missing"
         
+        messages = [
+            {"role": "system", "content": system_prompt}
+        ]
+        if context:
+            messages.append({"role": "user", "content": f"Previous conversation history:\n{context}"})
+        messages.append({"role": "user", "content": user_input})
+
         res = requests.post("https://api.openai.com/v1/chat/completions",
             headers={"Authorization": f"Bearer {key}"},
             json={
                 "model": self.config['llm'].get('model', 'gpt-4o-mini'),
-                "messages": [{"role": "user", "content": prompt}]
+                "messages": messages
             }, timeout=30)
         
         if res.status_code != 200:
