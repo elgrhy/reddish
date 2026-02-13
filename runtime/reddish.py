@@ -69,4 +69,3 @@ if __name__ == "__main__":
     runtime = ReddishRuntime(cfg_file)
     server = HTTPServer(('0.0.0.0', runtime.config['runtime']['port']), ReddishHandler)
     server.serve_forever()
- Riverside
