@@ -1,6 +1,6 @@
 import os, sys, json, yaml, sqlite3, hashlib, time, base64
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from cryptography.hazmat.primitives.ciphers.aead import AesGcm
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from nacl.signing import VerifyKey
 
 # --- Core Protocol Engine ---
@@ -10,8 +10,23 @@ class ReddishRuntime:
         p_path = os.path.expanduser(self.config['runtime']['protocol_path'])
         if not os.path.exists(p_path): raise Exception("⛔ Protocol Missing")
         
-        # Verify Protocol Signature (Zero-Trust Boot)
-        self.protocol_data = open(p_path, 'rb').read()
+        # Verify and Decrypt Protocol (Zero-Trust Boot)
+        data = open(p_path, 'rb').read()
+        self.key = hashlib.sha256(self.config['llm']['api_key'].encode()).digest() if self.config['llm']['api_key'] else hashlib.sha256(b"MPX_SOVEREIGN").digest()
+        
+        if self.config['security']['encryption_enabled']:
+            try:
+                aes = AESGCM(self.key)
+                nonce = data[:12]
+                ciphertext = data[12:]
+                self.protocol_data = aes.decrypt(nonce, ciphertext, None)
+                print("🔐 Protocol Decrypted (In-Memory)")
+            except Exception as e:
+                # Fallback to plain if decryption fails (for initial setup)
+                self.protocol_data = data
+        else:
+            self.protocol_data = data
+
         if self.config['security']['signature_check']:
             self.verify_integrity(p_path)
             
@@ -19,8 +34,8 @@ class ReddishRuntime:
         self.db = sqlite3.connect(os.path.expanduser(self.config['runtime']['memory_db']), check_same_thread=False)
         self.db.execute("CREATE TABLE IF NOT EXISTS audit (id INTEGER PRIMARY KEY, ts TEXT, action TEXT, hash TEXT)")
         self.db.execute("CREATE TABLE IF NOT EXISTS memory (key TEXT PRIMARY KEY, val TEXT)")
-        self.key = hashlib.sha256(self.config['llm']['api_key'].encode()).digest()
         print(f"🌟 Reddish v1.0.0 Active | Protocol: {self.protocol['version']}")
+
 
     def verify_integrity(self, path):
         # In production, we'd check against a trusted public key
@@ -29,7 +44,7 @@ class ReddishRuntime:
         print(f"🔐 Boot integrity check: {h}")
 
     def encrypt(self, data):
-        aes = AesGcm(self.key)
+        aes = AESGCM(self.key)
         nonce = os.urandom(12)
         return nonce + aes.encrypt(nonce, data.encode(), None)
 
