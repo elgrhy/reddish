@@ -12,25 +12,47 @@ class ReddishRuntime:
         
         # Verify and Decrypt Protocol (Zero-Trust Boot)
         data = open(p_path, 'rb').read()
-        self.key = hashlib.sha256(self.config['llm']['api_key'].encode()).digest() if self.config['llm']['api_key'] else hashlib.sha256(b"MPX_SOVEREIGN").digest()
+        bootstrap_key = hashlib.sha256(b"MPX_SOVEREIGN").digest()
+        user_key = hashlib.sha256(self.config['llm']['api_key'].encode()).digest() if self.config['llm']['api_key'] else None
         
+        self.protocol_data = None
         if self.config['security']['encryption_enabled']:
-            try:
-                aes = AESGCM(self.key)
-                nonce = data[:12]
-                ciphertext = data[12:]
-                self.protocol_data = aes.decrypt(nonce, ciphertext, None)
-                print("🔐 Protocol Decrypted (In-Memory)")
-            except Exception as e:
-                # Fallback to plain if decryption fails (for initial setup)
-                self.protocol_data = data
+            # 1. Try User Key
+            if user_key:
+                try:
+                    aes = AESGCM(user_key)
+                    self.protocol_data = aes.decrypt(data[:12], data[12:], None)
+                    self.key = user_key
+                    print("🔐 Protocol Decrypted via User Key")
+                except: pass
+
+            # 2. Try Bootstrap Key (if not yet decrypted)
+            if not self.protocol_data:
+                try:
+                    aes = AESGCM(bootstrap_key)
+                    self.protocol_data = aes.decrypt(data[:12], data[12:], None)
+                    print("� Protocol Decrypted via Bootstrap Key")
+                    
+                    # 3. Upgrade to User Key (Re-protection)
+                    if user_key:
+                        self.key = user_key
+                        protected_data = self.encrypt(self.protocol_data.decode())
+                        with open(p_path, 'wb') as f:
+                            f.write(protected_data)
+                        print("🛡️ Protocol Upgraded to Sovereign Encryption")
+                except Exception as e:
+                    # Fallback to plain if decryption fails (for legacy or setup)
+                    self.protocol_data = data
+                    self.key = user_key or bootstrap_key
         else:
             self.protocol_data = data
+            self.key = user_key or bootstrap_key
 
         if self.config['security']['signature_check']:
             self.verify_integrity(p_path)
             
         self.protocol = yaml.safe_load(self.protocol_data)
+
         self.db = sqlite3.connect(os.path.expanduser(self.config['runtime']['memory_db']), check_same_thread=False)
         self.db.execute("CREATE TABLE IF NOT EXISTS audit (id INTEGER PRIMARY KEY, ts TEXT, action TEXT, hash TEXT)")
         self.db.execute("CREATE TABLE IF NOT EXISTS memory (key TEXT PRIMARY KEY, val TEXT)")
