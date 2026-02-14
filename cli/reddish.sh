@@ -146,9 +146,17 @@ function set_llm() {
     echo "✅ LLM updated. Restart reddish to apply."
 }
 
+function force_stop() {
+    echo "🛑 Force-stopping all Reddish processes..."
+    ps aux | grep 'reddish.py' | grep -v grep | awk '{print $2}' | xargs kill -9 2>/dev/null
+    rm -f "$PID_FILE"
+    echo "✅ All processes terminated."
+}
+
 case "$1" in
     start) start ;;
     stop) stop ;;
+    force-stop) force_stop ;;
     status) status ;;
     chat) chat ;;
     query) shift; query "$@" ;;
