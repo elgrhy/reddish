@@ -30,14 +30,22 @@ Ask a question without entering the full chat:
 reddish query "summarize our ethical core"
 ```
 
-### 4. Management Commands
+### 4. Autonomous Scheduler
+Schedule jobs using natural language:
+```bash
+reddish schedule "Post daily summary to X at 9am"
+reddish jobs
+reddish cancel [job_id]
+```
+
+### 5. Management Commands
 *   `reddish status`: Check if the substrate is active.
 *   `reddish stop`: Gracefully shutdown the engine.
 *   `reddish logs`: View real-time background processing.
 *   `reddish audit`: View the cryptographically hashed audit trail.
 *   `reddish upgrade`: Pull the latest features and security updates from GitHub.
 
-### 5. Sovereign Control (LLM & Local Support)
+### 6. Sovereign Control (LLM & Local Support)
 Switch between OpenAI and Local LLMs (Ollama/LM Studio):
 ```bash
 reddish set-llm http://localhost:11434/v1 my-local-key
@@ -60,24 +68,24 @@ Reddish follows a zero-trust, API-first architecture.
 curl -X POST http://localhost:7777/think -d '{"input":"What is the goal of the protocol?"}'
 ```
 
+**Schedule (Natural Language):**
+```bash
+curl -X POST http://localhost:7777/schedule -d '{"task":"Log heartbeat every minute"}'
+```
+
 **Audit Trail:**
 ```bash
 curl http://localhost:7777/audit
 ```
 
-**Protocol Evolution:**
-```bash
-curl -X POST http://localhost:7777/evolve -d '{"diff":{"version":2}}'
-```
-
 ## 🔐 Security & Sovereignty
 - **AES-256-GCM**: Protocol state and memory are encrypted using your LLM key as a derivative.
 - **Ed25519**: All plugins and protocol updates must be signed.
-- **Microscopic Runtime**: The core logic is under 100 lines of Python, ensuring minimal attack surface.
+- **Microscopic Runtime**: The core logic is under 200 lines of Python, ensuring minimal attack surface.
 
 ## 🧬 Architecture
 Reddish moves the "brain" out of the code and into the `.mpx` file. The runtime is merely an enforcer for the protocol's ethics, identity, and goals.
 
 ---
-**Status: v1.0.0 Stable (MPX v1.0.0)**
+**Status: v1.2.0 Production (MPX v1.2.0)**
 *Built for the Protocol Civilization.*
