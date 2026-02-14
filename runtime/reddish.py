@@ -100,20 +100,34 @@ class ReddishRuntime:
         context = "\n".join(history)
 
         # 2. Prepare System Persona
-        system_prompt = f"""You are {self.protocol['identity']['name']}, a helpful AI Assistant.
+        capabilities = ", ".join(self.protocol.get('capabilities', []))
+        system_prompt = f"""You are {self.protocol['identity']['name']}, an Omnichannel AI Executive Assistant.
 Goal: {self.protocol['goals']['primary']}
+Capabilities: {capabilities}
 Current Time: {time.ctime()}
 Directives: {', '.join(self.protocol['ethics']['core_directives'])}
 
 INSTRUCTIONS: 
-- Be direct, concise, and helpful.
-- Do NOT talk about 'governing' or 'civilizations' unless explicitly asked.
-- Act as a high-level executive assistant.
-- If you don't know something (like the weather), just say so or offer to help with something else."""
+- You have REAL-WORLD POWERS through the MPX Kernel. 
+- You can access the internet, post to Social Media (X, TikTok, YT), and manage DevOps.
+- If a user asks you to check a website or post something, respond by saying you are doing it.
+- Format your response to explicitly say: "ACTION: [plugin_name].[action_name] [args]" if you are triggering a task.
+- Be direct, concise, and proactive."""
 
         # 3. Call LLM
         try:
             decision = self.call_llm(system_prompt, user_input, context)
+            
+            # Simple Action Executor for Web/Status
+            if "ACTION: web.uptime_check" in decision:
+                try:
+                    url = decision.split("web.uptime_check")[1].strip().split(" ")[0]
+                    if not url.startswith("http"): url = "https://" + url
+                    res = requests.get(url, timeout=5)
+                    decision += f"\n\n[Kernel] Root execution: {url} is UP (Status {res.status_code})."
+                except:
+                    decision += f"\n\n[Kernel] Root execution: Unable to reach {url}."
+
             # Store memory
             self.db.execute("INSERT INTO memory (key, val) VALUES (?, ?)", (str(time.time()), f"User: {user_input}\nAssistant: {decision}"))
             self.db.commit()
