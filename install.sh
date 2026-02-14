@@ -38,7 +38,7 @@ fetch_file "runtime/reddish.py" "$RC_HOME/reddish.py"
 echo "⬇ Synchronizing plugins..."
 fetch_file "plugins.yaml" "$RC_HOME/plugins.yaml"
 
-PLUGINS=("audit.plugin.yaml" "core.plugin.yaml" "evolution.plugin.yaml" "security.plugin.yaml" "swarm.plugin.yaml" "telegram.plugin.yaml" "whatsapp.plugin.yaml")
+PLUGINS=("audit.plugin.yaml" "core.plugin.yaml" "evolution.plugin.yaml" "security.plugin.yaml" "swarm.plugin.yaml" "telegram.plugin.yaml" "whatsapp.plugin.yaml" "social.plugin.yaml" "deploy.plugin.yaml")
 for plugin in "${PLUGINS[@]}"; do
     if [ -f "plugins/$plugin" ]; then
         cp "plugins/$plugin" "$RC_HOME/plugins/$plugin"
@@ -58,7 +58,7 @@ sudo chmod +x /usr/local/bin/reddish
 
 # Dependencies
 echo "📦 Installing substrate dependencies..."
-python3 -m pip install cryptography pyyaml requests pynacl --user --quiet
+python3 -m pip install cryptography pyyaml requests pynacl croniter --user --quiet
 
 # 5. Configuration (Interactive Prompt)
 echo -e "\n🌟 \033[1mWELCOME TO REDDISH\033[0m — Bootstrapping Sovereign Mental Protocol"

@@ -1,7 +1,10 @@
-import os, sys, json, yaml, sqlite3, hashlib, time, base64, requests
+import os, sys, json, yaml, sqlite3, hashlib, time, base64, requests, threading
+from datetime import datetime
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from nacl.signing import VerifyKey
+try: from croniter import croniter
+except ImportError: croniter = None
 
 # --- Core Protocol Engine ---
 class ReddishRuntime:
@@ -58,6 +61,19 @@ class ReddishRuntime:
         self.db.execute("CREATE TABLE IF NOT EXISTS memory (key TEXT PRIMARY KEY, val TEXT)")
         print(f"🌟 Reddish v1.0.0 Active | Protocol: {self.protocol['version']}")
 
+        # Initialize Scheduler
+        if self.protocol.get('scheduler', {}).get('enabled', False):
+            threading.Thread(target=self.scheduler_loop, daemon=True).start()
+            print("🕒 Scheduler Active")
+
+    def save_protocol(self):
+        p_path = os.path.expanduser(self.config['runtime']['protocol_path'])
+        data = yaml.dump(self.protocol)
+        protected_data = self.encrypt(data)
+        with open(p_path, 'wb') as f:
+            f.write(protected_data)
+        print("💾 Protocol Saved and Re-encrypted")
+
 
     def verify_integrity(self, path):
         # In production, we'd check against a trusted public key
@@ -107,6 +123,88 @@ INSTRUCTIONS:
             
         return {"status": "success", "decision": decision, "identity": self.protocol['identity']}
 
+    def scheduler_loop(self):
+        while True:
+            now = datetime.now()
+            jobs = self.protocol.get('scheduler', {}).get('jobs', [])
+            for job in jobs:
+                try:
+                    sched = job.get('schedule')
+                    if not sched: continue
+                    it = croniter(sched, now)
+                    # Simple check: if next run is within the last 60 seconds
+                    # and we haven't run it yet for this specific tick
+                    # In a real system, we'd store 'last_run' in DB
+                    # For now, let's keep it minimal
+                    # We will use memory.db to track last execution to avoid double runs
+                    job_key = f"job_last_run_{job['id']}"
+                    cursor = self.db.execute("SELECT val FROM memory WHERE key = ?", (job_key,))
+                    last_run_str = cursor.fetchone()
+                    
+                    if last_run_str:
+                        last_run = datetime.fromisoformat(last_run_str[0])
+                        # If the next run scheduled according to last_run is in the past, run it
+                        next_run = croniter(sched, last_run).get_next(datetime)
+                    else:
+                        # First time seeing this job, schedule for next occurrence
+                        next_run = croniter(sched, now).get_next(datetime)
+                        self.db.execute("INSERT INTO memory (key, val) VALUES (?, ?)", (job_key, now.isoformat()))
+                        self.db.commit()
+                        continue
+
+                    if now >= next_run:
+                        print(f"🕒 Executing Scheduled Job: {job['id']}")
+                        result = self.think(job['input'].get('prompt', job['id']))
+                        self.audit("schedule_exec", f"ID: {job['id']} | Action: {job['action']} | Result: {result['decision']}")
+                        self.db.execute("UPDATE memory SET val = ? WHERE key = ?", (now.isoformat(), job_key))
+                        self.db.commit()
+                except Exception as e:
+                    print(f"⚠️ Scheduler Error ({job.get('id')}): {e}")
+
+            time.sleep(30) # Tick every 30 seconds
+
+    def add_schedule(self, task_description):
+        # Use LLM to convert natural language to job block
+        prompt = f"""Convert the following scheduling request into a JSON block for the MPX protocol.
+Request: "{task_description}"
+Format:
+{{
+  "id": "unique_id",
+  "schedule": "cron_string",
+  "action": "plugin.action",
+  "input": {{ "prompt": "specific action prompt" }},
+  "description": "short description"
+}}
+Rules:
+- Use standard cron format (e.g., "0 9 * * *" for daily 9am).
+- ID should be lowercase and underscored.
+- Action should be specific to the request.
+JSON:"""
+        
+        try:
+            res_json = self.call_llm("You are a Protocol Compiler.", prompt, "")
+            # Extract JSON if LLM added preamble
+            if "```json" in res_json:
+                res_json = res_json.split("```json")[1].split("```")[0].strip()
+            elif "{" in res_json:
+                res_json = res_json[res_json.find("{"):res_json.rfind("}")+1]
+            
+            job = json.loads(res_json)
+            if 'scheduler' not in self.protocol: self.protocol['scheduler'] = {'enabled': True, 'jobs': []}
+            self.protocol['scheduler']['jobs'].append(job)
+            self.save_protocol()
+            return {"status": "success", "job": job}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    def remove_schedule(self, job_id):
+        if 'scheduler' in self.protocol:
+            jobs = self.protocol['scheduler'].get('jobs', [])
+            self.protocol['scheduler']['jobs'] = [j for j in jobs if j['id'] != job_id]
+            self.save_protocol()
+            return {"status": "success"}
+        return {"status": "error", "message": "No scheduler found"}
+
     def call_llm(self, system_prompt, user_input, context):
         key = self.config['llm']['api_key']
         if not key: return "⛔ API Key Missing"
@@ -136,11 +234,14 @@ class ReddishHandler(BaseHTTPRequestHandler):
         content_length = int(self.headers.get('Content-Length', 0))
         data = json.loads(self.rfile.read(content_length)) if content_length > 0 else {}
         if self.path == '/think': self._send_json(runtime.think(data.get('input', '')))
+        elif self.path == '/schedule': self._send_json(runtime.add_schedule(data.get('task', '')))
+        elif self.path == '/jobs/delete': self._send_json(runtime.remove_schedule(data.get('id', '')))
         elif self.path == '/evolve': self._send_json({"status": "evolution_triggered", "diff": data.get('diff', {})})
 
     def do_GET(self):
         if self.path == '/status': self._send_json({"status": "active", "version": runtime.protocol['version']})
         elif self.path == '/health': self._send_json({"health": "ok"})
+        elif self.path == '/jobs': self._send_json(runtime.protocol.get('scheduler', {}).get('jobs', []))
         elif self.path == '/audit':
             logs = runtime.db.execute("SELECT * FROM audit ORDER BY id DESC LIMIT 10").fetchall()
             self._send_json({"audit_logs": logs})

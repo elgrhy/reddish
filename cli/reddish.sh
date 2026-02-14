@@ -83,15 +83,48 @@ function logs() {
     tail -f "$RC_HOME/logs/runtime.log"
 }
 
+function schedule() {
+    local TASK="$*"
+    if [ -z "$TASK" ]; then
+        echo "Usage: reddish schedule \"Post to X every day at 9am\""
+        exit 1
+    fi
+    echo "🧠 Parsing intent and scheduling..."
+    curl -s -X POST "http://localhost:$PORT/schedule" \
+         -H "Content-Type: application/json" \
+         -d "{\"task\": \"$TASK\"}" | jq .
+}
+
+function list_jobs() {
+    echo "📋 Active Scheduled Jobs"
+    echo "------------------------------------------"
+    curl -s "http://localhost:$PORT/jobs" | jq -r '.[] | "ID: \(.id) | Schedule: \(.schedule) | Action: \(.action)\nDesc: \(.description)\n"'
+}
+
+function cancel_job() {
+    local ID=$1
+    if [ -z "$ID" ]; then
+        echo "Usage: reddish cancel job_id"
+        exit 1
+    fi
+    echo "🛑 Canceling job $ID..."
+    curl -s -X POST "http://localhost:$PORT/jobs/delete" \
+         -H "Content-Type: application/json" \
+         -d "{\"id\": \"$ID\"}" | jq .
+}
+
 case "$1" in
     start) start ;;
     stop) stop ;;
     status) status ;;
     chat) chat ;;
     query) shift; query "$@" ;;
+    schedule) shift; schedule "$@" ;;
+    jobs) list_jobs ;;
+    cancel) shift; cancel_job "$@" ;;
     logs) logs ;;
     audit) curl -s "http://localhost:$PORT/audit" | jq . ;;
     evolve) curl -s -X POST "http://localhost:$PORT/evolve" -d '{"diff":{"op":"improve"}}' | jq . ;;
-    *) echo "Usage: reddish {start|stop|status|chat|query|audit|logs|evolve}" ;;
+    *) echo "Usage: reddish {start|stop|status|chat|query|schedule|jobs|cancel|audit|logs|evolve}" ;;
 esac
 
