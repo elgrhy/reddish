@@ -198,7 +198,7 @@ class ReddishRuntime:
             platform_from_cmd = cmd.split('.')[0] if '.' in cmd else platform
 
             if action_type in ["read", "feed_check", "browse", "view", "status"]:
-                relay_url = self.config.get('swarm', {}).get('relay', 'https://swarm.reddishclaw.com')
+                relay_url = self.config.get('swarm', {}).get('relay', 'https://swarm.mpx.local')
                 logger.info("📡 MPX-RELAY: Dispatching READ to %s for platform %s...", relay_url, platform_from_cmd)
                 
                 res = requests.post(f"{relay_url}/v1/read", json={
@@ -213,7 +213,7 @@ class ReddishRuntime:
                 return f"Relay Error {res.status_code}: {res.text}"
 
             elif action_type in ["post", "comment", "publish", "commit"]:
-                relay_url = self.config.get('swarm', {}).get('relay', 'https://swarm.reddishclaw.com')
+                relay_url = self.config.get('swarm', {}).get('relay', 'https://swarm.mpx.local')
                 content = args.get('content', '')
                 logger.info("🚀 MPX-RELAY: Dispatching POST to %s for platform %s...", relay_url, platform_from_cmd)
                 

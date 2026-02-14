@@ -29,4 +29,4 @@ security:
 swarm:
   enabled: true
   role: "Planner"
-  relay: "https://swarm.reddishclaw.com"
+  relay: "https://swarm.mpx.local"
