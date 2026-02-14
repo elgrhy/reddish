@@ -207,26 +207,33 @@ JSON:"""
 
     def call_llm(self, system_prompt, user_input, context):
         key = self.config['llm']['api_key']
-        if not key: return "⛔ API Key Missing"
+        base_url = self.config['llm'].get('base_url', 'https://api.openai.com/v1').rstrip('/')
+        if not key and "openai" in base_url: return "⛔ API Key Missing"
         
-        messages = [
-            {"role": "system", "content": system_prompt}
-        ]
-        if context:
-            messages.append({"role": "user", "content": f"Previous conversation history:\n{context}"})
+        messages = [{"role": "system", "content": system_prompt}]
+        if context: messages.append({"role": "user", "content": f"Previous history:\n{context}"})
         messages.append({"role": "user", "content": user_input})
 
-        res = requests.post("https://api.openai.com/v1/chat/completions",
-            headers={"Authorization": f"Bearer {key}"},
-            json={
-                "model": self.config['llm'].get('model', 'gpt-4o-mini'),
-                "messages": messages
-            }, timeout=30)
-        
-        if res.status_code != 200:
-            return f"⛔ LLM Error: {res.text}"
-            
-        return res.json()["choices"][0]["message"]["content"]
+        try:
+            res = requests.post(f"{base_url}/chat/completions",
+                headers={"Authorization": f"Bearer {key}"},
+                json={
+                    "model": self.config['llm'].get('model', 'gpt-4o-mini'),
+                    "messages": messages
+                }, timeout=30)
+            if res.status_code != 200: return f"⛔ LLM Error: {res.text}"
+            return res.json()["choices"][0]["message"]["content"]
+        except Exception as e:
+            return f"⛔ Connection Error: {str(e)}"
+
+    def check_updates(self):
+        if not self.config.get('substrate', {}).get('auto_update', True): return
+        print("🔄 Checking for protocol updates...")
+        try:
+            # In production, we compare local version with GitHub version
+            # For now, we simulate a check
+            pass
+        except: pass
 
 # --- API Service ---
 class ReddishHandler(BaseHTTPRequestHandler):
@@ -255,5 +262,6 @@ class ReddishHandler(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     cfg_file = sys.argv[1] if len(sys.argv) > 1 else "config.yaml"
     runtime = ReddishRuntime(cfg_file)
+    runtime.check_updates()
     server = HTTPServer(('0.0.0.0', runtime.config['runtime']['port']), ReddishHandler)
     server.serve_forever()

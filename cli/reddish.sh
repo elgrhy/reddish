@@ -113,6 +113,31 @@ function cancel_job() {
          -d "{\"id\": \"$ID\"}" | jq .
 }
 
+function upgrade() {
+    echo "🆕 Checking for Reddish core updates..."
+    curl -sSL https://raw.githubusercontent.com/elgrhy/reddish/main/install.sh | bash
+    echo "✅ Upgrade process completed."
+}
+
+function set_llm() {
+    local URL=$1
+    local KEY=$2
+    if [ -z "$URL" ]; then
+        echo "Usage: reddish set-llm <base_url> [api_key]"
+        echo "Example (Ollama): reddish set-llm http://localhost:11434/v1"
+        exit 1
+    fi
+    echo "⚙️ Updating LLM Configuration..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' "s|base_url: \".*\"|base_url: \"$URL\"|" "$RC_HOME/config.yaml"
+        if [ -n "$KEY" ]; then sed -i '' "s|api_key: \".*\"|api_key: \"$KEY\"|" "$RC_HOME/config.yaml"; fi
+    else
+        sed -i "s|base_url: \".*\"|base_url: \"$URL\"|" "$RC_HOME/config.yaml"
+        if [ -n "$KEY" ]; then sed -i "s|api_key: \".*\"|api_key: \"$KEY\"|" "$RC_HOME/config.yaml"; fi
+    fi
+    echo "✅ LLM updated. Restart reddish to apply."
+}
+
 case "$1" in
     start) start ;;
     stop) stop ;;
@@ -122,9 +147,11 @@ case "$1" in
     schedule) shift; schedule "$@" ;;
     jobs) list_jobs ;;
     cancel) shift; cancel_job "$@" ;;
+    upgrade) upgrade ;;
+    set-llm) shift; set_llm "$@" ;;
     logs) logs ;;
     audit) curl -s "http://localhost:$PORT/audit" | jq . ;;
     evolve) curl -s -X POST "http://localhost:$PORT/evolve" -d '{"diff":{"op":"improve"}}' | jq . ;;
-    *) echo "Usage: reddish {start|stop|status|chat|query|schedule|jobs|cancel|audit|logs|evolve}" ;;
+    *) echo "Usage: reddish {start|stop|status|chat|query|schedule|jobs|cancel|upgrade|set-llm|audit|logs|evolve}" ;;
 esac
 

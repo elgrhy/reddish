@@ -35,6 +35,20 @@ reddish query "summarize our ethical core"
 *   `reddish stop`: Gracefully shutdown the engine.
 *   `reddish logs`: View real-time background processing.
 *   `reddish audit`: View the cryptographically hashed audit trail.
+*   `reddish upgrade`: Pull the latest features and security updates from GitHub.
+
+### 5. Sovereign Control (LLM & Local Support)
+Switch between OpenAI and Local LLMs (Ollama/LM Studio):
+```bash
+reddish set-llm http://localhost:11434/v1 my-local-key
+```
+
+### 🧬 Omnichannel Capabilities
+Reddish now supports protocol-governed interactions across:
+- **Messaging**: WhatsApp, Telegram
+- **Social**: X.com, Instagram, TikTok
+- **Content**: YouTube
+- **Automation**: DevOps Deployments, Social Scheduling
 
 
 ## 🌐 curl API Interface

@@ -5,7 +5,13 @@
 llm:
   provider: "openai"
   model: "gpt-4o-mini"
-  api_key: "" # To be provided by user via CLI
+  api_key: "" 
+  base_url: "https://api.openai.com/v1" # Can be changed for Ollama/Local LLM
+
+substrate:
+  auto_update: true
+  channel: "main"
+  version: "1.2.0"
 
 runtime:
   port: 7777

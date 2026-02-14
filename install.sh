@@ -38,7 +38,7 @@ fetch_file "runtime/reddish.py" "$RC_HOME/reddish.py"
 echo "⬇ Synchronizing plugins..."
 fetch_file "plugins.yaml" "$RC_HOME/plugins.yaml"
 
-PLUGINS=("audit.plugin.yaml" "core.plugin.yaml" "evolution.plugin.yaml" "security.plugin.yaml" "swarm.plugin.yaml" "telegram.plugin.yaml" "whatsapp.plugin.yaml" "social.plugin.yaml" "deploy.plugin.yaml")
+PLUGINS=("audit.plugin.yaml" "core.plugin.yaml" "evolution.plugin.yaml" "security.plugin.yaml" "swarm.plugin.yaml" "telegram.plugin.yaml" "whatsapp.plugin.yaml" "social.plugin.yaml" "deploy.plugin.yaml" "instagram.plugin.yaml" "tiktok.plugin.yaml" "youtube.plugin.yaml")
 for plugin in "${PLUGINS[@]}"; do
     if [ -f "plugins/$plugin" ]; then
         cp "plugins/$plugin" "$RC_HOME/plugins/$plugin"

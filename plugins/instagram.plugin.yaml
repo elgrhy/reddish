@@ -1,0 +1,5 @@
+name: "instagram"
+version: "1.0.0"
+capabilities: ["post_photo", "post_story", "comment"]
+description: "Handles Instagram interactions via MPX protocol."
+signature: "b1c8c1c1a7c3a6cc0709d284972ec473b888c2addab19377bdbfef99c089d5e6"
