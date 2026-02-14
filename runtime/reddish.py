@@ -123,6 +123,13 @@ INSTRUCTIONS:
             
         return {"status": "success", "decision": decision, "identity": self.protocol['identity']}
 
+    def handle_omnichannel(self, platform, sender, content):
+        print(f"📥 MPX-IN [{platform}]: {sender} -> {content}")
+        self.audit(f"omni_receive_{platform}", f"From: {sender} | Content: {content}")
+        res = self.think(f"[{platform}] {sender}: {content}")
+        self.audit(f"omni_respond_{platform}", f"To: {sender} | Response: {res['decision']}")
+        return res
+
     def scheduler_loop(self):
         while True:
             now = datetime.now()
@@ -131,22 +138,14 @@ INSTRUCTIONS:
                 try:
                     sched = job.get('schedule')
                     if not sched: continue
-                    it = croniter(sched, now)
-                    # Simple check: if next run is within the last 60 seconds
-                    # and we haven't run it yet for this specific tick
-                    # In a real system, we'd store 'last_run' in DB
-                    # For now, let's keep it minimal
-                    # We will use memory.db to track last execution to avoid double runs
                     job_key = f"job_last_run_{job['id']}"
                     cursor = self.db.execute("SELECT val FROM memory WHERE key = ?", (job_key,))
-                    last_run_str = cursor.fetchone()
+                    row = cursor.fetchone()
                     
-                    if last_run_str:
-                        last_run = datetime.fromisoformat(last_run_str[0])
-                        # If the next run scheduled according to last_run is in the past, run it
+                    if row:
+                        last_run = datetime.fromisoformat(row[0])
                         next_run = croniter(sched, last_run).get_next(datetime)
                     else:
-                        # First time seeing this job, schedule for next occurrence
                         next_run = croniter(sched, now).get_next(datetime)
                         self.db.execute("INSERT INTO memory (key, val) VALUES (?, ?)", (job_key, now.isoformat()))
                         self.db.commit()
@@ -155,13 +154,12 @@ INSTRUCTIONS:
                     if now >= next_run:
                         print(f"🕒 Executing Scheduled Job: {job['id']}")
                         result = self.think(job['input'].get('prompt', job['id']))
-                        self.audit("schedule_exec", f"ID: {job['id']} | Action: {job['action']} | Result: {result['decision']}")
+                        self.audit("schedule_exec", f"ID: {job['id']} | Result: {result['decision']}")
                         self.db.execute("UPDATE memory SET val = ? WHERE key = ?", (now.isoformat(), job_key))
                         self.db.commit()
                 except Exception as e:
                     print(f"⚠️ Scheduler Error ({job.get('id')}): {e}")
-
-            time.sleep(30) # Tick every 30 seconds
+            time.sleep(30)
 
     def add_schedule(self, task_description):
         # Use LLM to convert natural language to job block
@@ -230,10 +228,19 @@ JSON:"""
         if not self.config.get('substrate', {}).get('auto_update', True): return
         print("🔄 Checking for protocol updates...")
         try:
-            # In production, we compare local version with GitHub version
-            # For now, we simulate a check
-            pass
-        except: pass
+            remote_url = "https://raw.githubusercontent.com/elgrhy/reddish/main/config.yaml"
+            res = requests.get(remote_url, timeout=10)
+            if res.status_code == 200:
+                remote_cfg = yaml.safe_load(res.text)
+                remote_version = remote_cfg.get('substrate', {}).get('version', '0.0.0')
+                local_version = self.config.get('substrate', {}).get('version', '0.0.0')
+                if remote_version > local_version:
+                    print(f"🆕 NEW VERSION AVAILABLE: {remote_version} (Local: {local_version})")
+                    print("👉 Run 'reddish upgrade' to apply updates.")
+                else:
+                    print(f"✅ Substrate is up to date (v{local_version})")
+        except Exception as e:
+            print(f"⚠️ Update Check Failed: {e}")
 
 # --- API Service ---
 class ReddishHandler(BaseHTTPRequestHandler):
@@ -243,6 +250,10 @@ class ReddishHandler(BaseHTTPRequestHandler):
         if self.path == '/think': self._send_json(runtime.think(data.get('input', '')))
         elif self.path == '/schedule': self._send_json(runtime.add_schedule(data.get('task', '')))
         elif self.path == '/jobs/delete': self._send_json(runtime.remove_schedule(data.get('id', '')))
+        elif self.path == '/webhook/whatsapp': 
+            self._send_json(runtime.handle_omnichannel("whatsapp", data.get('from'), data.get('text')))
+        elif self.path == '/webhook/telegram':
+            self._send_json(runtime.handle_omnichannel("telegram", data.get('user_id'), data.get('message')))
         elif self.path == '/evolve': self._send_json({"status": "evolution_triggered", "diff": data.get('diff', {})})
 
     def do_GET(self):
