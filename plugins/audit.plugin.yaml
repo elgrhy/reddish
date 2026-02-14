@@ -1,4 +1,6 @@
-name: "audit"
-version: "1.0.0"
-capabilities: ["merkle_trail", "logging"]
-signature: "1b66b67744ce7d6b40d8904777d46868c88c43375e99355cfccefa1eb68143d7"
+name: audit
+version: 1.0.0
+capabilities:
+- merkle_trail
+- logging
+signature: 7bcab70bfbb16c271444ef2543e298c6f755154a8350cd9869f168bdbdc4ceeba9874808126fec849bf94520ebca478e599ed8da5be1d0e97a5054954256290b

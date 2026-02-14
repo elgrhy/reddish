@@ -1,5 +1,7 @@
-name: "deploy"
-version: "1.0.0"
-capabilities: ["git_deploy", "npm_publish"]
-description: "Handles deployment workflows via MPX protocol."
-signature: "d1c8c1c1a7c3a6cc0709d284972ec473b888c2addab19377bdbfef99c089d5e6"
+name: deploy
+version: 1.0.0
+capabilities:
+- git_deploy
+- npm_publish
+description: Handles deployment workflows via MPX protocol.
+signature: 2e6cf6b9e5858e68a62a5a0c84e211f32b7226fe8762d39d848f159d08e684943aa8fb1e5f7cf1e3754337d8303e7b25530d24a36b309b9aff39b0e237e8ee03

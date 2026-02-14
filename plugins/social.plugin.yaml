@@ -1,5 +1,7 @@
-name: "social"
-version: "1.0.0"
-capabilities: ["x_post", "facebook_post"]
-description: "Handles social media interactions via MPX protocol."
-signature: "f1c8c1c1a7c3a6cc0709d284972ec473b888c2addab19377bdbfef99c089d5e6"
+name: social
+version: 1.0.0
+capabilities:
+- x_post
+- facebook_post
+description: Handles social media interactions via MPX protocol.
+signature: 6c95ed3212c88528b81d1d55b9246a25b7517e79e90370240760cb7bdf42cd3a48ae85ca4f6fafdd31dcc377fe672a6fd1400f3c4e8857966bf8234c53996500

@@ -1,4 +1,6 @@
-name: "swarm"
-version: "1.0.0"
-capabilities: ["federation", "mcp"]
-signature: "aacb14ca5bcefd2c0a143f4f833d8315b8f9758a3c183442fcd4a2e78eb61cfa"
+name: swarm
+version: 1.0.0
+capabilities:
+- federation
+- mcp
+signature: b805bc9ffc267da4c079f0e22622aa1d9266f6a9375297445283af9d12e2c61051141636169f7ea173419cb88b53eb0be8e5a09e40bef696ed02885e5f560e01

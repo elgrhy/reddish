@@ -114,9 +114,17 @@ function cancel_job() {
 }
 
 function upgrade() {
-    echo "🆕 Checking for Reddish core updates..."
-    curl -sSL https://raw.githubusercontent.com/elgrhy/reddish/main/install.sh | bash
-    echo "✅ Upgrade process completed."
+    echo "🆕 Initiating Protocol-Self-Evolution..."
+    res=$(curl -s -X POST "http://localhost:$PORT/evolve")
+    if echo "$res" | grep -q "success"; then
+        echo "✅ Substrate evolution complete. Restarting service..."
+        stop
+        start
+    else
+        echo "❌ Evolution failed: $res"
+        echo "🔄 Falling back to manual installer..."
+        curl -sSL https://raw.githubusercontent.com/elgrhy/reddish/main/install.sh | bash
+    fi
 }
 
 function set_llm() {

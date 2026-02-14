@@ -1,4 +1,6 @@
-name: "core"
-version: "1.0.0"
-capabilities: ["llm_mediation", "memory"]
-signature: "e5c09e6e992172e5298bb78e98a49b151f12c1adaa087e93d484a3ff79056835"
+name: core
+version: 1.0.0
+capabilities:
+- llm_mediation
+- memory
+signature: 5bb13eb71fd92697791ed54c1033c6f395b750073eaecdf244fdc446d7c76afd1cdc60542d465835ddc467ca5ed601468e2a4c70c30822befe0153077b5cca0a

@@ -1,4 +1,6 @@
-name: "security"
-version: "1.0.0"
-capabilities: ["encryption", "signature_verification"]
-signature: "27c8c1c1a7c3a6cc0709d284972ec473b888c2addab19377bdbfef99c089d5e6"
+name: security
+version: 1.0.0
+capabilities:
+- encryption
+- signature_verification
+signature: f47531299189aca68eae4a323eea08a400d73f36f840027ce3bf19cc2bc9db040b44b98d30ec6fcce0514040179e06d667db8ec04e86d4997bb0f340e3aebd0a

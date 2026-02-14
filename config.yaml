@@ -10,6 +10,7 @@ llm:
 
 substrate:
   auto_update: true
+  auto_apply: true
   channel: "main"
   version: "1.2.0"
 

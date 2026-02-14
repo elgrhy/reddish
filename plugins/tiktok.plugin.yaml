@@ -1,5 +1,11 @@
-name: "tiktok"
-version: "1.0.0"
-capabilities: ["post_video", "comment", "like"]
-description: "Handles TikTok interactions via MPX protocol."
-signature: "c1c8c1c1a7c3a6cc0709d284972ec473b888c2addab19377bdbfef99c089d5e6"
+name: tiktok
+version: 1.0.0
+capabilities:
+- post_video
+- read_trending
+- read_user_posts
+- read_comments
+- comment
+- like
+description: Handles TikTok interactions via MPX protocol.
+signature: 4ce9d2731a1463d7bc159ffd5a24f0d324ae8279611ea9a8892d1b564048befcf68f3140150b08c9cc3e0de3ccd904768d51744089dadb97c7c9098901568101

@@ -1,4 +1,6 @@
-name: "telegram"
-version: "1.0.0"
-capabilities: ["messaging", "notifications"]
-signature: "f3c8c1c1a7c3a6cc0709d284972ec473b888c2addab19377bdbfef99c089d5e6"
+name: telegram
+version: 1.0.0
+capabilities:
+- messaging
+- notifications
+signature: 7e39c4501c0236644bf57ff017d6de182da3718e6d67868ba5447b414b039076f57b66b7f479b82bd0c132b7b33234e524c720c528b180905a0f612fc9854e08

@@ -1,5 +1,8 @@
-name: "web"
-version: "1.0.0"
-capabilities: ["browse", "http_get", "uptime_check"]
-description: "Allows the agent to interact with the web and check site status."
-signature: "w1c8c1c1a7c3a6cc0709d284972ec473b888c2addab19377bdbfef99c089d5e6"
+name: web
+version: 1.0.0
+capabilities:
+- browse
+- http_get
+- uptime_check
+description: Allows the agent to interact with the web and check site status.
+signature: 2fc0ef9e63cb1269e832c2c2bed1b454dae9f385db180835b3d00943aa92d928a2736022d402e14d379de9853f50f172ad3efea1d299151922f5f43d2e27ef06

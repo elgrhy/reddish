@@ -1,5 +1,10 @@
-name: "youtube"
-version: "1.0.0"
-capabilities: ["post_short", "comment", "video_info"]
-description: "Handles YouTube interactions via MPX protocol."
-signature: "e1c8c1c1a7c3a6cc0709d284972ec473b888c2addab19377bdbfef99c089d5e6"
+name: youtube
+version: 1.0.0
+capabilities:
+- post_short
+- read_video_stats
+- read_comments
+- comment
+- video_info
+description: Handles YouTube interactions via MPX protocol.
+signature: 50260f3af1e31fde4135213c6d020c54851094a3acc9b8a03d712e5c83b5173fa86bc023c8209c94ad7bf250e9132e0f567f86e4d076f26b684d06a9a845bc02

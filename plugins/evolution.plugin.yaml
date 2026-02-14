@@ -1,4 +1,6 @@
-name: "evolution"
-version: "1.0.0"
-capabilities: ["self_update", "diff_application"]
-signature: "97652844f0d1aaec79b8f1e53722aed03153d89ba248fcec011f3284aded2ce7"
+name: evolution
+version: 1.0.0
+capabilities:
+- self_update
+- diff_application
+signature: 46b3d63e8ba2f148f06114e97b906915be7cd4409c6c6550ac633ba704ee6981137536766535b7776e6d19ebc54fc566a21022ef29726c2d55a789a01e992506

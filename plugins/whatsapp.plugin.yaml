@@ -1,4 +1,6 @@
-name: "whatsapp"
-version: "1.0.0"
-capabilities: ["messaging", "notifications"]
-signature: "d1c8c1c1a7c3a6cc0709d284972ec473b888c2addab19377bdbfef99c089d5e6"
+name: whatsapp
+version: 1.0.0
+capabilities:
+- messaging
+- notifications
+signature: c8d13be45393e894ec9dc41e16447ed9c10a34211095b0e3b48181d5805823f598a97966294cdfb4ab3828d499e4e4553dd56da43722127f0e05da497b7cb10b
