@@ -12,7 +12,7 @@ substrate:
   auto_update: true
   auto_apply: true
   channel: "main"
-  version: "1.2.0"
+  version: "1.2.1"
 
 runtime:
   port: 7777
